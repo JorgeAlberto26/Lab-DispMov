@@ -7,6 +7,9 @@ import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.firebase.FirebaseApp
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 
 class MainActivity : AppCompatActivity() {
 
@@ -14,10 +17,15 @@ class MainActivity : AppCompatActivity() {
     private lateinit var etEmail: EditText
     private lateinit var etPassword: EditText
     private lateinit var btnCreateUser: Button
+    private lateinit var etConfirmPassword: EditText
+    private lateinit var auth: FirebaseAuth
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.main_activity) // Usa el layout principal (activity_main.xml)
+        FirebaseApp.initializeApp(this)
+        setContentView(R.layout.main_activity)
+
+        auth = FirebaseAuth.getInstance()
 
         // Inflar el layout de creación de usuario (login.xml) dentro del contenedor
         val inflater = LayoutInflater.from(this)
@@ -29,6 +37,7 @@ class MainActivity : AppCompatActivity() {
         etEmail = loginView.findViewById(R.id.etEmail)
         etPassword = loginView.findViewById(R.id.etPassword)
         btnCreateUser = loginView.findViewById(R.id.btnCreateUser)
+        etConfirmPassword = loginView.findViewById(R.id.etConfirmPassword)
 
         // Configurar el clic del botón
         btnCreateUser.setOnClickListener {
@@ -40,19 +49,42 @@ class MainActivity : AppCompatActivity() {
         val name = etName.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val password = etPassword.text.toString().trim()
+        val confirmPassword = etConfirmPassword.text.toString().trim()
 
-        if (name.isEmpty() || email.isEmpty() || password.isEmpty()) {
+        // Validar campos vacíos
+        if (name.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             Toast.makeText(this, "Por favor, complete todos los campos", Toast.LENGTH_SHORT).show()
             return
         }
 
-        // Aquí puedes agregar la lógica para crear el usuario, como enviar los datos a un servidor o guardarlos en una base de datos local.
-        // Por ahora, solo mostraremos un mensaje de éxito.
-        Toast.makeText(this, "Usuario creado exitosamente", Toast.LENGTH_SHORT).show()
+        // Validar que las contraseñas coincidan
+        if (password != confirmPassword) {
+            Toast.makeText(this, "Las contraseñas no coinciden", Toast.LENGTH_SHORT).show()
+            return
+        }
 
-        // Limpiar los campos después de crear el usuario
-        etName.text.clear()
-        etEmail.text.clear()
-        etPassword.text.clear()
+        // Crear usuario con Firebase Auth
+        auth.createUserWithEmailAndPassword(email, password)
+            .addOnCompleteListener(this) { task ->
+                if (task.isSuccessful) {
+                    // Registro exitoso
+                    val user = auth.currentUser
+                    sendEmailVerification(user) // Enviar correo de verificación
+                } else {
+                    // Error en el registro
+                    Toast.makeText(this, "Error: ${task.exception?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+    }
+
+    private fun sendEmailVerification(user: FirebaseUser?) {
+        user?.sendEmailVerification()
+            ?.addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    Toast.makeText(this, "Correo de verificación enviado a ${user.email}", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this, "Error al enviar el correo de verificación", Toast.LENGTH_SHORT).show()
+                }
+            }
     }
 }

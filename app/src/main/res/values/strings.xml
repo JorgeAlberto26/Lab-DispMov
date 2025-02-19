@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Lab</string>
+    <string name="crea_una_cuenta">Crea una cuenta.</string>
+    <string name="ingrese_los_datos_correspondientes">Ingrese los datos correspondientes:</string>
+    <string name="ingrese_su_nombre">Ingrese su nombre</string>
+    <string name="ingrese_su_correo_electr_nico">Ingrese su correo electrónico</string>
+    <string name="ingrese_una_contrase_a">Ingrese una contraseña</string>
+    <string name="crear_cuenta">Crear cuenta</string>
+    <string name="confirme_su_contrase_a">Confirme su contraseña</string>
 </resources>
