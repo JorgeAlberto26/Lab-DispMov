@@ -1,5 +1,6 @@
 package org.example.lab
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.widget.Button
@@ -81,7 +82,10 @@ class MainActivity : AppCompatActivity() {
         user?.sendEmailVerification()
             ?.addOnCompleteListener { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Correo de verificación enviado a ${user.email}", Toast.LENGTH_SHORT).show()
+                    // Redirigir a la pantalla de confirmación
+                    val intent = Intent(this, ConfirmationActivity::class.java)
+                    startActivity(intent)
+                    finish() // Opcional: Cierra MainActivity para evitar que el usuario regrese
                 } else {
                     Toast.makeText(this, "Error al enviar el correo de verificación", Toast.LENGTH_SHORT).show()
                 }
